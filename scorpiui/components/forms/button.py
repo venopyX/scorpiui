@@ -1,8 +1,29 @@
+"""
+Button Component Module
+
+This module provides the Button component for ScorpiUI.
+"""
+
 import uuid
 from jinja2 import Template
-from scorpiui.event_handler import register_event
+from scorpiui.core.events import register_event
 
 class Button:
+    """
+    A customizable button component that uses WebSocket for event handling.
+    
+    Attributes:
+        label (str): The text to display on the button
+        height (int): Height of the button in pixels
+        width (int): Width of the button in pixels
+        background_color (str): CSS color for the button background
+        text_color (str): CSS color for the button text
+        border_radius (str): CSS border radius value
+        onclick (callable): Function to call when button is clicked
+        js_code (str, optional): Additional JavaScript code to run on click
+        css_code (str, optional): Additional CSS styles to apply
+    """
+    
     def __init__(self, label, height, width, background_color, text_color, border_radius, onclick, js_code=None, css_code=None):
         self.label = label
         self.height = height
@@ -16,19 +37,20 @@ class Button:
         self.id = uuid.uuid4().hex
         register_event(self.id, self.handle_event)
 
+    def handle_event(self, event_data):
+        """Handle WebSocket events for this button."""
+        if self.onclick:
+            return self.onclick()
+
     def render(self):
+        """Render the button HTML with WebSocket event handling."""
         js_event_handler = f"""
         document.getElementById("{self.id}").onclick = function() {{
-            fetch('/_event', {{
-                method: 'POST',
-                headers: {{
-                    'Content-Type': 'application/json',
-                }},
-                body: JSON.stringify({{'event_id': '{self.id}'}})
-            }});
+            ScorpiUI.emit('{self.id}');
             {self.js_code if self.js_code else ''}
         }};
         """
+        
         style = f"""
         style="
             height: {self.height}px; 
@@ -39,18 +61,17 @@ class Button:
             {self.css_code if self.css_code else ''}
         "
         """
+        
         template = Template("""
-        <button id="{{ id }}" class="simple-button" {{ style }}>
+        <button id="{{ id }}" class="scorpiui-component simple-button" {{ style }}>
           {{ label }}
         </button>
         <script>{{ js_event_handler }}</script>
         """)
+        
         return template.render(
             id=self.id,
             label=self.label,
             style=style,
             js_event_handler=js_event_handler
         )
-
-    def handle_event(self, event_data):
-        self.onclick()

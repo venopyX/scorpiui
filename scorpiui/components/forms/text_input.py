@@ -1,8 +1,32 @@
+"""
+TextInput Component Module
+
+This module provides the TextInput component for ScorpiUI.
+"""
+
 import uuid
 from jinja2 import Template
-from scorpiui.event_handler import register_event
+from scorpiui.core.events import register_event
 
 class TextInput:
+    """
+    A customizable text input component that uses WebSocket for event handling.
+    
+    Attributes:
+        placeholder (str): Placeholder text to display when empty
+        value (str): Initial value of the input
+        height (int, optional): Height of the input in pixels
+        width (int, optional): Width of the input in pixels
+        background_color (str, optional): CSS color for the input background
+        text_color (str, optional): CSS color for the input text
+        border_radius (str, optional): CSS border radius value
+        text_align (str): Text alignment (left, center, right)
+        read_only (bool): Whether the input is read-only
+        on_change (callable): Function to call when input value changes
+        js_code (str, optional): Additional JavaScript code to run on change
+        css_code (str, optional): Additional CSS styles to apply
+    """
+    
     def __init__(self, placeholder="", value="", height=None, width=None, background_color=None, text_color=None, border_radius=None, 
                  text_align="left", read_only=False, on_change=None, js_code=None, css_code=None):
         self.placeholder = placeholder
@@ -20,19 +44,21 @@ class TextInput:
         self.id = uuid.uuid4().hex
         register_event(self.id, self.handle_event)
 
+    def handle_event(self, event_data):
+        """Handle WebSocket events for this input."""
+        if self.on_change:
+            value = event_data.get('value', '')
+            return self.on_change(value)
+
     def render(self):
+        """Render the text input HTML with WebSocket event handling."""
         js_event_handler = f"""
         document.getElementById("{self.id}").oninput = function() {{
-            fetch('/_event', {{
-                method: 'POST',
-                headers: {{
-                    'Content-Type': 'application/json',
-                }},
-                body: JSON.stringify({{'event_id': '{self.id}', 'value': this.value}})
-            }});
+            ScorpiUI.emit('{self.id}', {{value: this.value}});
             {self.js_code if self.js_code else ''}
         }};
         """
+        
         style = f"""
         style="
             {f'height: {self.height}px;' if self.height else ''}
@@ -44,10 +70,12 @@ class TextInput:
             {self.css_code if self.css_code else ''}
         "
         """
+        
         template = Template("""
-        <input id="{{ id }}" class="simple-text-input" type="text" placeholder="{{ placeholder }}" value="{{ value }}" {{ style }} {{ 'readonly' if read_only else '' }}>
+        <input id="{{ id }}" class="scorpiui-component simple-text-input" type="text" placeholder="{{ placeholder }}" value="{{ value }}" {{ style }} {{ 'readonly' if read_only else '' }}>
         <script>{{ js_event_handler }}</script>
         """)
+        
         return template.render(
             id=self.id,
             placeholder=self.placeholder,
@@ -56,12 +84,3 @@ class TextInput:
             js_event_handler=js_event_handler,
             read_only=self.read_only
         )
-
-    def handle_event(self, event_data):
-        new_value = event_data['value']
-        self.value = new_value
-        if self.on_change:
-            self.on_change(new_value)
-
-    def get_value(self):
-        return str(self.value)

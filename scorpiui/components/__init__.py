@@ -1,4 +1,3 @@
-from .button import Button
-from .text_input import TextInput
+from .forms import Button, TextInput
 
 __all__ = ["Button", "TextInput"]
