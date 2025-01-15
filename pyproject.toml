@@ -9,7 +9,7 @@ packages = ["scorpiui"]
 name = "scorpiui"
 version = "0.0.1"
 authors = [
-  { name="Gemechis Chala (ScorpiDev)", email="gladsonchala@gmail.com" },
+  { name="Gemechis Chala (ScorpiDev)", email="venopyx@gmail.com" },
 ]
 description = "ScorpiUI: A Python UI library for building web apps with minimal HTML, CSS, and JS."
 readme = "README.md"
@@ -30,5 +30,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/gladsonchala/scorpiui"
-Issues = "https://github.com/gladsonchala/scorpiui/issues"
+Homepage = "https://github.com/venopyx/scorpiui"
+Issues = "https://github.com/venopyx/scorpiui/issues"
