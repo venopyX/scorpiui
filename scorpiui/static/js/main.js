@@ -6,6 +6,9 @@ window.ScorpiUI = {
     // Event handling system
     events: {},
 
+    // State management
+    stateHandlers: {},
+
     // Initialize ScorpiUI
     init: function() {
         this.initWebSocket();
@@ -28,6 +31,12 @@ window.ScorpiUI = {
         this.socket.on('event_response', (data) => {
             console.log('Event response:', data);
             this.trigger(data.event_id + '_response', data.response);
+        });
+
+        this.socket.on('state_change', (data) => {
+            console.log('State change:', data);
+            const { component_id, state } = data;
+            this.handleStateChange(component_id, state);
         });
 
         this.socket.on('error', (data) => {
@@ -68,6 +77,19 @@ window.ScorpiUI = {
         };
 
         this.socket.emit('component_event', eventData);
+    },
+
+    // Register state handler for a component
+    onStateChange: function(componentId, handler) {
+        this.stateHandlers[componentId] = handler;
+    },
+
+    // Handle state change from server
+    handleStateChange: function(componentId, newState) {
+        const handler = this.stateHandlers[componentId];
+        if (handler) {
+            handler(newState);
+        }
     }
 };
 
