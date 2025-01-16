@@ -79,10 +79,15 @@ class TextInput(BaseComponent):
         self.outline_color = outline_color
         self.outline_width = outline_width
         self.outline_style = outline_style
-        
-        # Register change event handler
-        if on_change:
-            self.on('change', on_change)
+        self.on_change = on_change
+        register_event(self.id, self.handle_event)
+
+    def handle_event(self, event_data):
+        """Handle WebSocket events for this input."""
+        if self.on_change:
+            # Extract value from event data
+            value = event_data.get('value') if isinstance(event_data, dict) else event_data
+            return self.on_change(value)
 
     def render(self):
         """Render the text input HTML."""
@@ -116,6 +121,7 @@ class TextInput(BaseComponent):
                 placeholder="{{ placeholder }}"
                 value="{{ value }}"
                 style="{{ style }}"
+                onchange="ScorpiUI.emit('{{ id }}', {data: {value: this.value}})"
             >
             <style>{{ focus_style }}</style>
             {{ script }}
