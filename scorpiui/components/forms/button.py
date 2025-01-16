@@ -5,12 +5,12 @@ This module provides the Button component for ScorpiUI.
 """
 
 from jinja2 import Template
+from scorpiui.core.component import Component
 from scorpiui.core.events import register_event
-from scorpiui.core.base_component import BaseComponent
 from typing import Optional, Dict, Any, Union
 
 
-class Button(BaseComponent):
+class Button(Component):
     """
     A customizable button component that uses WebSocket for event handling.
 

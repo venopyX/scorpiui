@@ -6,10 +6,10 @@ This module provides the TextInput component for ScorpiUI.
 
 from jinja2 import Template
 from scorpiui.core.events import EventMixin
-from scorpiui.core.base_component import BaseComponent
+from scorpiui.core.component import Component
 from typing import Optional, Dict, Any, Union, Callable
 
-class TextInput(BaseComponent, EventMixin):
+class TextInput(Component, EventMixin):
     """
     A customizable text input component that uses WebSocket for event handling.
     

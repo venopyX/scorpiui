@@ -6,9 +6,9 @@ This module provides the container component for layout in ScorpiUI.
 
 from typing import List, Optional, Dict, Any, Union
 from jinja2 import Template
-from scorpiui.core.base_component import BaseComponent
+from scorpiui.core.component import Component
 
-class Container(BaseComponent):
+class Container(Component):
     """
     A customizable container component for layout.
     
@@ -44,7 +44,7 @@ class Container(BaseComponent):
     
     def __init__(
         self,
-        children: Union[List[BaseComponent], BaseComponent],
+        children: Union[List[Component], Component],
         id: Optional[str] = None,
         display: str = "flex",
         flex_direction: str = "row",
@@ -76,7 +76,7 @@ class Container(BaseComponent):
         super().__init__(id=id, script=script, style=style)
         
         # Convert single component to list
-        self.children = [children] if isinstance(children, BaseComponent) else children
+        self.children = [children] if isinstance(children, Component) else children
         
         self.display = display
         self.flex_direction = flex_direction
@@ -105,7 +105,7 @@ class Container(BaseComponent):
     @classmethod
     def create_responsive(
         cls,
-        children: Union[List[BaseComponent], BaseComponent],
+        children: Union[List[Component], Component],
         id: Optional[str] = None,
         mobile_styles: Optional[Dict[str, Any]] = None,
         tablet_styles: Optional[Dict[str, Any]] = None,
@@ -116,7 +116,7 @@ class Container(BaseComponent):
         Create a responsive container with different styles for mobile, tablet, and desktop.
         
         Args:
-            children (list or BaseComponent): Child components to be rendered
+            children (list or Component): Child components to be rendered
             id (str, optional): Unique identifier for the container
             mobile_styles (dict): Styles for mobile devices
             tablet_styles (dict): Styles for tablet devices
@@ -224,7 +224,7 @@ class Container(BaseComponent):
         # Render children
         rendered_children = []
         for child in self.children:
-            if isinstance(child, BaseComponent):
+            if isinstance(child, Component):
                 rendered_children.append(child.render())
             else:
                 rendered_children.append(str(child))

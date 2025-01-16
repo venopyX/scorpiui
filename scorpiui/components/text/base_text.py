@@ -5,10 +5,10 @@ This module provides the base text component for all text-based components in Sc
 """
 
 from jinja2 import Template
-from scorpiui.core.base_component import BaseComponent
-from typing import Optional, Dict, Any
+from scorpiui.core.component import Component
+from typing import Optional, Dict, Any, Union
 
-class BaseText(BaseComponent):
+class BaseText(Component):
     """
     Base class for all text components with common styling and functionality.
     
