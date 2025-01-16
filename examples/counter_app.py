@@ -36,8 +36,12 @@ def on_reset():
 def on_increment_change(value):
     """Update the increment amount."""
     try:
-        increment_state.set_state(int(value))
-    except ValueError:
+        # Convert value to int, default to 1 if invalid
+        if isinstance(value, dict):
+            value = value.get('value', '')
+        new_value = int(str(value)) if value else 1
+        increment_state.set_state(new_value)
+    except (ValueError, TypeError):
         increment_state.set_state(1)
 
 # Create UI components with custom colors and consistent sizing
