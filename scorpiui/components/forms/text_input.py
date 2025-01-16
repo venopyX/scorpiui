@@ -1,86 +1,93 @@
 """
-TextInput Component Module
+Text Input Component Module
 
-This module provides the TextInput component for ScorpiUI.
+This module provides a TextInput component with customizable styling and event handling.
 """
 
-import uuid
-from jinja2 import Template
-from scorpiui.core.events import register_event
+from dataclasses import dataclass, field
+from typing import Optional, Callable, Any, Dict
+from ...core.component import Component
+from ...core.events import register_event
 
-class TextInput:
+@dataclass
+class TextInput(Component):
     """
-    A customizable text input component that uses WebSocket for event handling.
+    A customizable text input component with event handling.
     
     Attributes:
-        placeholder (str): Placeholder text to display when empty
-        value (str): Initial value of the input
-        height (int, optional): Height of the input in pixels
-        width (int, optional): Width of the input in pixels
-        background_color (str, optional): CSS color for the input background
-        text_color (str, optional): CSS color for the input text
-        border_radius (str, optional): CSS border radius value
-        text_align (str): Text alignment (left, center, right)
-        read_only (bool): Whether the input is read-only
-        on_change (callable): Function to call when input value changes
-        js_code (str, optional): Additional JavaScript code to run on change
-        css_code (str, optional): Additional CSS styles to apply
+        id (str): Component ID for state management and styling
+        value (str): Initial input value
+        placeholder (str): Placeholder text
+        on_change (Optional[Callable]): Change event handler
+        style (Dict[str, str]): CSS styles
+        script (str): JavaScript code
+        disabled (bool): Whether input is disabled
     """
-    
-    def __init__(self, placeholder="", value="", height=None, width=None, background_color=None, text_color=None, border_radius=None, 
-                 text_align="left", read_only=False, on_change=None, js_code=None, css_code=None):
-        self.placeholder = placeholder
-        self.value = value
-        self.height = height
-        self.width = width
-        self.background_color = background_color
-        self.text_color = text_color
-        self.border_radius = border_radius
-        self.text_align = text_align
-        self.read_only = read_only
-        self.on_change = on_change
-        self.js_code = js_code
-        self.css_code = css_code
-        self.id = uuid.uuid4().hex
-        register_event(self.id, self.handle_event)
+    id: str = ""
+    value: str = ""
+    placeholder: str = ""
+    on_change: Optional[Callable] = None
+    style: Dict[str, str] = field(default_factory=lambda: {
+        "width": "200px",
+        "height": "40px",
+        "background-color": "#ffffff",
+        "color": "#000000",
+        "border-radius": "4px",
+        "padding": "8px",
+        "font-size": "16px",
+        "text-align": "left",
+        "border": "1px solid #ccc",
+        "outline": "none",
+        "transition": "border-color 0.2s ease-in-out"
+    })
+    script: str = ""
+    disabled: bool = False
+    classes: list[str] = field(default_factory=lambda: ["scorpiui-component", "scorpiui-text-input"])
 
-    def handle_event(self, event_data):
-        """Handle WebSocket events for this input."""
+    def __post_init__(self):
+        """Initialize input styles and event handling."""
+        # Register change event if handler provided
         if self.on_change:
-            value = event_data.get('value', '')
-            return self.on_change(value)
+            register_event(self.id, "change", self.on_change)
 
-    def render(self):
-        """Render the text input HTML with WebSocket event handling."""
-        js_event_handler = f"""
-        document.getElementById("{self.id}").oninput = function() {{
-            ScorpiUI.emit('{self.id}', {{value: this.value}});
-            {self.js_code if self.js_code else ''}
-        }};
+        # Add focus effect script
+        self.script += f"""
+document.getElementById("{self.id}").addEventListener("focus", function() {{
+    this.style.borderColor = "#007bff";
+}});
+document.getElementById("{self.id}").addEventListener("blur", function() {{
+    this.style.borderColor = "#ccc";
+}});
+"""
+
+        if self.disabled:
+            self.style.update({
+                "cursor": "not-allowed",
+                "opacity": "0.6",
+                "background-color": "#f5f5f5"
+            })
+
+    def render(self) -> str:
         """
+        Render the text input component.
         
-        style = f"""
-        style="
-            {f'height: {self.height}px;' if self.height else ''}
-            {f'width: {self.width}px;' if self.width else ''}
-            {f'background-color: {self.background_color};' if self.background_color else ''}
-            {f'color: {self.text_color};' if self.text_color else ''}
-            {f'border-radius: {self.border_radius};' if self.border_radius else ''}
-            text-align: {self.text_align};
-            {self.css_code if self.css_code else ''}
-        "
+        Returns:
+            str: HTML representation of the text input
         """
+        disabled_attr = 'disabled="disabled"' if self.disabled else ""
+        onchange = f'onchange="ScorpiUI.emit(\'{self.id}\', {{event: \'change\', value: this.value}})"' if self.on_change else ""
         
-        template = Template("""
-        <input id="{{ id }}" class="scorpiui-component simple-text-input" type="text" placeholder="{{ placeholder }}" value="{{ value }}" {{ style }} {{ 'readonly' if read_only else '' }}>
-        <script>{{ js_event_handler }}</script>
-        """)
-        
-        return template.render(
-            id=self.id,
-            placeholder=self.placeholder,
-            value=self.value,
-            style=style,
-            js_event_handler=js_event_handler,
-            read_only=self.read_only
-        )
+        input_html = f"""
+{self._generate_style_tag()}
+{self._generate_script_tag()}
+<input 
+    type="text"
+    id="{self.id}"
+    class="{self._get_class_string()}"
+    value="{self.value}"
+    placeholder="{self.placeholder}"
+    {disabled_attr}
+    {onchange}
+>
+"""
+        return input_html

@@ -1,77 +1,92 @@
 """
 Button Component Module
 
-This module provides the Button component for ScorpiUI.
+This module provides a Button component with customizable styling and event handling.
 """
 
-import uuid
-from jinja2 import Template
-from scorpiui.core.events import register_event
+from dataclasses import dataclass, field
+from typing import Optional, Callable, Any, Dict
+from ...core.component import Component
+from ...core.events import register_event
 
-class Button:
+@dataclass
+class Button(Component):
     """
-    A customizable button component that uses WebSocket for event handling.
+    A customizable button component with event handling.
     
     Attributes:
-        label (str): The text to display on the button
-        height (int): Height of the button in pixels
-        width (int): Width of the button in pixels
-        background_color (str): CSS color for the button background
-        text_color (str): CSS color for the button text
-        border_radius (str): CSS border radius value
-        onclick (callable): Function to call when button is clicked
-        js_code (str, optional): Additional JavaScript code to run on click
-        css_code (str, optional): Additional CSS styles to apply
+        id (str): Component ID for state management and styling
+        label (str): Button text
+        onclick (Optional[Callable]): Click event handler
+        style (Dict[str, str]): CSS styles
+        script (str): JavaScript code
+        disabled (bool): Whether button is disabled
     """
-    
-    def __init__(self, label, height, width, background_color, text_color, border_radius, onclick, js_code=None, css_code=None):
-        self.label = label
-        self.height = height
-        self.width = width
-        self.background_color = background_color
-        self.text_color = text_color
-        self.border_radius = border_radius
-        self.onclick = onclick
-        self.js_code = js_code
-        self.css_code = css_code
-        self.id = uuid.uuid4().hex
-        register_event(self.id, self.handle_event)
+    id: str = ""
+    label: str = "Button"
+    onclick: Optional[Callable] = None
+    style: Dict[str, str] = field(default_factory=lambda: {
+        "width": "auto",
+        "height": "40px",
+        "background-color": "#007bff",
+        "color": "#ffffff",
+        "border-radius": "4px",
+        "padding": "8px 16px",
+        "font-size": "16px",
+        "border": "none",
+        "cursor": "pointer",
+        "opacity": "1",
+        "transition": "opacity 0.2s ease-in-out"
+    })
+    script: str = ""
+    disabled: bool = False
+    classes: list[str] = field(default_factory=lambda: ["scorpiui-component", "scorpiui-button"])
 
-    def handle_event(self, event_data):
-        """Handle WebSocket events for this button."""
+    def __post_init__(self):
+        """Initialize button styles and event handling."""
+        super().__post_init__()
+        
+        # Register click event if handler provided
         if self.onclick:
-            return self.onclick()
+            register_event(self.id, "click", self.onclick)
 
-    def render(self):
-        """Render the button HTML with WebSocket event handling."""
-        js_event_handler = f"""
-        document.getElementById("{self.id}").onclick = function() {{
-            ScorpiUI.emit('{self.id}');
-            {self.js_code if self.js_code else ''}
-        }};
+        # Add hover effect script if not disabled
+        if not self.disabled:
+            self.script += f"""
+document.getElementById("{self.id}").addEventListener("mouseover", function() {{
+    this.style.opacity = "0.8";
+}});
+document.getElementById("{self.id}").addEventListener("mouseout", function() {{
+    this.style.opacity = "1";
+}});
+"""
+            self.style["cursor"] = "pointer"
+        else:
+            self.style.update({
+                "cursor": "not-allowed",
+                "opacity": "0.6"
+            })
+
+    def render(self) -> str:
         """
+        Render the button component.
         
-        style = f"""
-        style="
-            height: {self.height}px; 
-            width: {self.width}px; 
-            background-color: {self.background_color};
-            color: {self.text_color}; 
-            border-radius: {self.border_radius};
-            {self.css_code if self.css_code else ''}
-        "
+        Returns:
+            str: HTML representation of the button
         """
+        disabled_attr = 'disabled="disabled"' if self.disabled else ""
+        onclick = f'onclick="ScorpiUI.emit(\'{self.id}\', {{event: \'click\'}})"' if self.onclick else ""
         
-        template = Template("""
-        <button id="{{ id }}" class="scorpiui-component simple-button" {{ style }}>
-          {{ label }}
-        </button>
-        <script>{{ js_event_handler }}</script>
-        """)
-        
-        return template.render(
-            id=self.id,
-            label=self.label,
-            style=style,
-            js_event_handler=js_event_handler
-        )
+        button_html = f"""
+{self._generate_style_tag()}
+{self._generate_script_tag()}
+<button 
+    id="{self.id}"
+    class="{self._get_class_string()}"
+    {disabled_attr}
+    {onclick}
+>
+    {self.label}
+</button>
+"""
+        return button_html
