@@ -32,8 +32,8 @@ class TextInput(BaseComponent):
         outline_width (str): CSS outline width for focus state
         outline_style (str): CSS outline style for focus state
         on_change (callable): Function to call when input value changes
-        js_code (str, optional): Additional JavaScript code to run on change
-        css_code (str, optional): Additional CSS styles to apply
+        script (str): Additional JavaScript code
+        style (str): Additional CSS styles
     """
     
     def __init__(
@@ -57,10 +57,11 @@ class TextInput(BaseComponent):
         outline_width="2px",
         outline_style="solid",
         on_change=None,
-        js_code=None,
-        css_code=None
+        script=None,
+        style=None
     ):
-        super().__init__(id)
+        """Initialize the text input component."""
+        super().__init__(id=id, script=script, style=style)
         self.placeholder = placeholder
         self.value = value
         self.height = height
@@ -78,73 +79,55 @@ class TextInput(BaseComponent):
         self.outline_color = outline_color
         self.outline_width = outline_width
         self.outline_style = outline_style
-        self.on_change = on_change
-        self.js_code = js_code
-        self.css_code = css_code
-        register_event(self.id, self.handle_event)
-
-    def handle_event(self, event_data):
-        """Handle WebSocket events for this input."""
-        if self.on_change and 'value' in event_data:
-            return self.on_change(event_data['value'])
+        
+        # Register change event handler
+        if on_change:
+            self.on('change', on_change)
 
     def render(self):
-        """Render the input HTML with WebSocket event handling."""
-        js_event_handler = f"""
-        document.getElementById("{self.id}").oninput = function(event) {{
-            ScorpiUI.emit('{self.id}', {{ value: event.target.value }});
-            {self.js_code if self.js_code else ''}
-        }};
+        """Render the text input HTML."""
+        style = [
+            f"height: {self.height}",
+            f"width: {self.width}",
+            f"background-color: {self.background_color}",
+            f"color: {self.text_color}",
+            f"border-radius: {self.border_radius}",
+            f"border: {self.border_width} {self.border_style} {self.border_color}",
+            f"padding: {self.padding}",
+            f"margin: {self.margin}",
+            f"font-size: {self.font_size}",
+            f"text-align: {self.text_align}",
+            "box-sizing: border-box",
+            "transition: border-color 0.3s ease, box-shadow 0.3s ease"
+        ]
+        
+        focus_style = f"""
+            #{{ id }}:focus {{
+                outline: {self.outline_width} {self.outline_style} {self.outline_color};
+                border-color: {self.outline_color};
+            }}
         """
-
-        input_template = Template("""
-            <input id="{{ id }}" 
-                   class="scorpiui-input"
-                   type="text"
-                   placeholder="{{ placeholder }}"
-                   value="{{ value }}"
-                   style="height: {{ height }}; 
-                          width: {{ width }};
-                          background-color: {{ background_color }};
-                          color: {{ text_color }};
-                          border-radius: {{ border_radius }};
-                          border: {{ border_width }} {{ border_style }} {{ border_color }};
-                          padding: {{ padding }};
-                          margin: {{ margin }};
-                          font-size: {{ font_size }};
-                          text-align: {{ text_align }};
-                          {{ css_code if css_code else '' }}">
-            <style>
-                #{{ id }}:focus {
-                    outline: {{ outline_width }} {{ outline_style }} {{ outline_color }};
-                    border-color: {{ outline_color }};
-                }
-                #{{ id }}:hover {
-                    border-color: {{ outline_color }};
-                }
-            </style>
-            <script>{{ js_event_handler }}</script>
+        
+        template = Template("""
+            <input
+                id="{{ id }}"
+                class="scorpiui-input"
+                type="text"
+                placeholder="{{ placeholder }}"
+                value="{{ value }}"
+                style="{{ style }}"
+            >
+            <style>{{ focus_style }}</style>
+            {{ script }}
+            {{ custom_style }}
         """)
-
-        return input_template.render(
+        
+        return template.render(
             id=self.id,
             placeholder=self.placeholder,
             value=self.value,
-            height=self.height,
-            width=self.width,
-            background_color=self.background_color,
-            text_color=self.text_color,
-            border_radius=self.border_radius,
-            border_color=self.border_color,
-            border_width=self.border_width,
-            border_style=self.border_style,
-            padding=self.padding,
-            margin=self.margin,
-            font_size=self.font_size,
-            text_align=self.text_align,
-            outline_color=self.outline_color,
-            outline_width=self.outline_width,
-            outline_style=self.outline_style,
-            css_code=self.css_code,
-            js_event_handler=js_event_handler
+            style="; ".join(style),
+            focus_style=focus_style,
+            script=self.get_script(),
+            custom_style=self.get_style()
         )

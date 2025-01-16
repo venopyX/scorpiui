@@ -23,8 +23,8 @@ class Button(BaseComponent):
         padding (str): CSS padding value (e.g., '8px 16px')
         font_size (str): CSS font size value (e.g., '16px')
         onclick (callable): Function to call when button is clicked
-        js_code (str, optional): Additional JavaScript code to run on click
-        css_code (str, optional): Additional CSS styles to apply
+        script (str): Additional JavaScript code
+        style (str): Additional CSS styles
     """
     
     def __init__(
@@ -39,10 +39,11 @@ class Button(BaseComponent):
         padding="8px 16px",
         font_size="16px",
         onclick=None,
-        js_code=None,
-        css_code=None
+        script=None,
+        style=None
     ):
-        super().__init__(id)
+        """Initialize the button component."""
+        super().__init__(id=id, script=script, style=style)
         self.label = label
         self.height = height
         self.width = width
@@ -52,8 +53,6 @@ class Button(BaseComponent):
         self.padding = padding
         self.font_size = font_size
         self.onclick = onclick
-        self.js_code = js_code
-        self.css_code = css_code
         register_event(self.id, self.handle_event)
 
     def handle_event(self, event_data):
@@ -62,40 +61,32 @@ class Button(BaseComponent):
             return self.onclick()
 
     def render(self):
-        """Render the button HTML with WebSocket event handling."""
-        js_event_handler = f"""
-        document.getElementById("{self.id}").onclick = function() {{
-            ScorpiUI.emit('{self.id}');
-            {self.js_code if self.js_code else ''}
-        }};
-        """
-
-        button_template = Template("""
-            <button id="{{ id }}" 
-                    class="scorpiui-button"
-                    style="height: {{ height }}; 
-                           width: {{ width }};
-                           background-color: {{ background_color }};
-                           color: {{ text_color }};
-                           border-radius: {{ border_radius }};
-                           padding: {{ padding }};
-                           font-size: {{ font_size }};
-                           {{ css_code if css_code else '' }}">
+        """Render the button HTML."""
+        style = [
+            f"height: {self.height}",
+            f"width: {self.width}",
+            f"background-color: {self.background_color}",
+            f"color: {self.text_color}",
+            f"border-radius: {self.border_radius}",
+            f"padding: {self.padding}",
+            f"font-size: {self.font_size}",
+            "border: none",
+            "cursor: pointer",
+            "transition: background-color 0.3s ease"
+        ]
+        
+        template = Template("""
+            <button id="{{ id }}" class="scorpiui-button" style="{{ style }}" onclick="ScorpiUI.emit('{{ id }}')">
                 {{ label }}
             </button>
-            <script>{{ js_event_handler }}</script>
+            {{ script }}
+            {{ custom_style }}
         """)
-
-        return button_template.render(
+        
+        return template.render(
             id=self.id,
             label=self.label,
-            height=self.height,
-            width=self.width,
-            background_color=self.background_color,
-            text_color=self.text_color,
-            border_radius=self.border_radius,
-            padding=self.padding,
-            font_size=self.font_size,
-            css_code=self.css_code,
-            js_event_handler=js_event_handler
+            style="; ".join(style),
+            script=self.get_script(),
+            custom_style=self.get_style()
         )
