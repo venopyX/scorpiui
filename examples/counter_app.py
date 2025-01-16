@@ -86,52 +86,23 @@ def on_increment_change(event: EventData):
 increment_button = Button(
     id="increment-button",
     label="Increment",
-    height="48px",
-    width="140px",
-    background_color="#4CAF50",
-    text_color="#ffffff",
-    border_radius="12px",
-    font_size="16px",
-    font_weight="600",
-    box_shadow="0 4px 6px rgba(76, 175, 80, 0.2)",
-    onclick=on_increment,
-    hover_opacity=0.9,
-    transition="all 0.2s ease-in-out",
-    cursor="pointer"
+    onclick=on_increment
 )
 
 decrement_button = Button(
     id="decrement-button",
     label="Decrement",
-    height="48px",
-    width="140px",
     background_color="#f44336",
-    text_color="#ffffff",
-    border_radius="12px",
-    font_size="16px",
-    font_weight="600",
     box_shadow="0 4px 6px rgba(244, 67, 54, 0.2)",
-    onclick=on_decrement,
-    hover_opacity=0.9,
-    transition="all 0.2s ease-in-out",
-    cursor="pointer"
+    onclick=on_decrement
 )
 
 reset_button = Button(
     id="reset-button",
     label="Reset",
-    height="48px",
-    width="140px",
     background_color="#9e9e9e",
-    text_color="#ffffff",
-    border_radius="12px",
-    font_size="16px",
-    font_weight="600",
     box_shadow="0 4px 6px rgba(158, 158, 158, 0.2)",
-    onclick=on_reset,
-    hover_opacity=0.9,
-    transition="all 0.2s ease-in-out",
-    cursor="pointer"
+    onclick=on_reset
 )
 
 increment_input = TextInput(
