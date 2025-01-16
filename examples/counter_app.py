@@ -49,12 +49,7 @@ increment_button = Button(
     background_color="#4CAF50",
     text_color="#ffffff",
     border_radius="8px",
-    onclick=on_increment,
-    js_code="""
-        ScorpiUI.onStateChange('counter', function(newState) {
-            document.getElementById('counter-value').textContent = newState;
-        });
-    """
+    onclick=on_increment
 )
 
 decrement_button = Button(
@@ -109,6 +104,8 @@ def home():
         font_size="1.5rem",
         font_weight="bold"
     )
+    # Bind counter state to the counter value text
+    counter_value.bind_state('counter')
     
     counter_label = Text(
         id="counter-label",
@@ -124,7 +121,7 @@ def home():
     )
     
     counter_container = Container(
-        content=f'{counter_label.render()}{counter_value.render()}',
+        content=f'{counter_label.render()}{counter_value.render()}<script>{counter_value.get_bindings()}</script>',
         margin="20px",
         justify_content="center"
     )
