@@ -10,6 +10,7 @@ from scorpiui.components.forms import Button, TextInput
 from scorpiui.components.layout import Container
 from scorpiui.components.text import Heading, Text
 from scorpiui.core import ComponentState
+from scorpiui.core.events import EventData, register_event
 from flask import render_template
 
 # Create a state for the counter
@@ -18,76 +19,138 @@ counter_state = ComponentState('counter', 0)
 # Create a state for the increment amount
 increment_state = ComponentState('increment', 1)
 
-def on_increment():
-    """Increment the counter by the current increment amount."""
+def on_increment(event: EventData):
+    """
+    Increment the counter by the current increment amount.
+    
+    Args:
+        event: Event data from the button click
+    """
     counter_state.update_state(lambda count: count + increment_state.state)
     return counter_state.state
 
-def on_decrement():
-    """Decrement the counter by the current increment amount."""
+def on_decrement(event: EventData):
+    """
+    Decrement the counter by the current increment amount.
+    
+    Args:
+        event: Event data from the button click
+    """
     counter_state.update_state(lambda count: count - increment_state.state)
     return counter_state.state
 
-def on_reset():
-    """Reset the counter to zero."""
+def on_reset(event: EventData):
+    """
+    Reset the counter to zero.
+    
+    Args:
+        event: Event data from the button click
+    """
     counter_state.set_state(0)
     return counter_state.state
 
-def on_increment_change(value):
-    """Update the increment amount."""
+def on_increment_change(event: EventData):
+    """
+    Update the increment amount.
+    
+    Args:
+        event: Event data containing the new increment value
+    """
     try:
-        # Convert value to int, default to 1 if invalid
-        if isinstance(value, dict):
-            value = value.get('value', '')
-        new_value = int(str(value)) if value else 1
-        increment_state.set_state(new_value)
-    except (ValueError, TypeError):
-        increment_state.set_state(1)
+        # Get the value from the event data
+        raw_value = event.value
+        if not raw_value:
+            print("No value provided, defaulting to 1")
+            increment_state.set_state(1)
+            return 1
 
-# Create UI components with custom colors and consistent sizing
+        # Convert to integer
+        new_value = int(raw_value)
+        if new_value < 1:
+            print("Value must be at least 1, defaulting to 1")
+            increment_state.set_state(1)
+            return 1
+
+        print(f"Increment value changed to: {new_value}")
+        increment_state.set_state(new_value)
+        return new_value
+    except (ValueError, TypeError) as e:
+        print(f"Error converting value: {e}, defaulting to 1")
+        increment_state.set_state(1)
+        return 1
+
+# Create UI components with modern design
 increment_button = Button(
     id="increment-button",
     label="Increment",
-    height="40px",
-    width="120px",
+    height="48px",
+    width="140px",
     background_color="#4CAF50",
     text_color="#ffffff",
-    border_radius="8px",
-    onclick=on_increment
+    border_radius="12px",
+    font_size="16px",
+    font_weight="600",
+    box_shadow="0 4px 6px rgba(76, 175, 80, 0.2)",
+    onclick=on_increment,
+    hover_opacity=0.9,
+    transition="all 0.2s ease-in-out",
+    cursor="pointer"
 )
 
 decrement_button = Button(
     id="decrement-button",
     label="Decrement",
-    height="40px",
-    width="120px",
+    height="48px",
+    width="140px",
     background_color="#f44336",
     text_color="#ffffff",
-    border_radius="8px",
-    onclick=on_decrement
+    border_radius="12px",
+    font_size="16px",
+    font_weight="600",
+    box_shadow="0 4px 6px rgba(244, 67, 54, 0.2)",
+    onclick=on_decrement,
+    hover_opacity=0.9,
+    transition="all 0.2s ease-in-out",
+    cursor="pointer"
 )
 
 reset_button = Button(
     id="reset-button",
     label="Reset",
-    height="40px",
-    width="120px",
+    height="48px",
+    width="140px",
     background_color="#9e9e9e",
     text_color="#ffffff",
-    border_radius="8px",
-    onclick=on_reset
+    border_radius="12px",
+    font_size="16px",
+    font_weight="600",
+    box_shadow="0 4px 6px rgba(158, 158, 158, 0.2)",
+    onclick=on_reset,
+    hover_opacity=0.9,
+    transition="all 0.2s ease-in-out",
+    cursor="pointer"
 )
 
 increment_input = TextInput(
     id="increment-input",
-    placeholder="Increment amount",
+    type="number",
     value="1",
-    width="120px",
+    width="100px",
+    height="48px",
+    border_radius="12px",
+    font_size="16px",
     text_align="center",
-    border_radius="8px",
-    outline_color="#4CAF50",
-    on_change=on_increment_change
+    margin="0 16px",
+    min_value=1,
+    step=1,
+    helper_text="Enter increment amount"
 )
+
+# Register global event handlers
+register_event("increment-input", on_increment_change)
+register_event("increment-button_click", on_increment)
+register_event("decrement-button_click", on_decrement)
+register_event("reset-button_click", on_reset)
 
 @app.route('/')
 def home():
@@ -95,95 +158,97 @@ def home():
     # Create containers for layout
     title = Heading(
         id="counter-title",
-        text="ScorpiUI Counter Example",
+        text="ScorpiUI Counter",
         level=1,
-        margin="20px 0",
-        text_align="center"
+        margin="40px 0 20px",
+        text_align="center",
+        font_size="3rem",
+        font_weight="700",
+        color="#2c3e50",
+        letter_spacing="-0.5px"
+    )
+    
+    counter_label = Text(
+        id="counter-label",
+        text="Current Value",
+        font_size="1.25rem",
+        text_align="center",
+        margin="0 0 10px",
+        color="#666666",
+        font_weight="500"
     )
     
     counter_value = Text(
         id="counter-value",
         text=str(counter_state.state),
-        color="#4CAF50",
-        font_size="1.5rem",
-        font_weight="bold",
-        script="""
-            // Log counter value changes to console
-            ScorpiUI.onStateChange('counter', function(newState) {
-                console.log('Counter value changed to:', newState);
-            });
-        """
-    )
-    # Bind counter state to the counter value text
-    counter_value.bind_state('counter')
-    
-    counter_label = Text(
-        id="counter-label",
-        text="Counter: ",
-        font_size="1.5rem",
-        font_weight="bold"
+        font_size="4rem",
+        text_align="center",
+        margin="0 0 30px",
+        color="#2c3e50",
+        font_weight="700",
+        font_family="'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
     )
     
-    title_container = Container(
-        content=title.render(),
-        margin="20px",
-        justify_content="center"
-    )
+    # Bind counter state to update the display
+    counter_value.bind_state('counter', 'text')
     
-    counter_container = Container(
-        content=f'{counter_label.render()}{counter_value.render()}<script>{counter_value.get_bindings()}</script>',
-        margin="20px",
-        justify_content="center"
-    )
-    
-    input_container = Container(
-        content=increment_input.render(),
-        margin="20px",
-        justify_content="center"
-    )
-    
-    buttons_container = Container.create_responsive(
-        content=f"{increment_button.render()}{decrement_button.render()}{reset_button.render()}",
-        margin="20px",
+    # Create layout containers with responsive design
+    counter_display = Container(
+        id="counter-display",
+        children=[counter_label, counter_value],
+        display="flex",
+        flex_direction="column",
         justify_content="center",
-        gap="20px",
+        align_items="center",
+        margin="0 0 40px",
+        padding="30px",
+        background_color="#f8f9fa",
+        border_radius="16px",
+        box_shadow="0 4px 6px rgba(0, 0, 0, 0.05)",
+        width="100%",
+        max_width="400px"
+    )
+    
+    button_container = Container.create_responsive(
+        id="button-container",
+        children=[increment_button, decrement_button, reset_button],
+        display="flex",
+        justify_content="center",
+        gap="16px",
+        margin="0 0 30px",
         mobile_styles={
-            "flex-direction": "column",
-            "align-items": "center",
-            "gap": "15px"
+            "flexDirection": "column",
+            "alignItems": "center",
+            "gap": "12px"
         },
         tablet_styles={
-            "flex-direction": "row",
-            "flex-wrap": "wrap",
-            "gap": "15px"
-        },
-        desktop_styles={
-            "flex-direction": "row",
-            "gap": "20px"
+            "flexDirection": "row",
+            "gap": "16px"
         }
     )
     
-    # Main container
-    main_container = Container(
-        content=f"""
-            {title_container.render()}
-            {counter_container.render()}
-            {input_container.render()}
-            {buttons_container.render()}
-        """,
-        flex_direction="column",
-        align_items="center",
-        padding="20px",
-        max_width="1200px",
-        margin="0 auto"
+    input_container = Container(
+        id="input-container",
+        children=[increment_input],
+        display="flex",
+        justify_content="center",
+        margin="0 0 40px"
     )
     
-    return render_template(
-        'base.html',
-        content=main_container.render(),
-        title="ScorpiUI Counter Example",
-        responsive_styles=getattr(app, 'responsive_styles', [])
+    main_container = Container(
+        id="main-container",
+        children=[title, counter_display, button_container, input_container],
+        display="flex",
+        flex_direction="column",
+        align_items="center",
+        max_width="800px",
+        margin="0 auto",
+        padding="20px",
+        background_color="#ffffff",
+        min_height="100vh"
     )
+    
+    return render_template('base.html', content=main_container.render())
 
 if __name__ == '__main__':
     run_app(port=8000)
