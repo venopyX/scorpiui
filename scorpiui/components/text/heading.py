@@ -25,7 +25,8 @@ class Heading(BaseComponent):
         line_height (str): Line height
         text_transform (str): Text transformation (e.g., 'uppercase')
         letter_spacing (str): Letter spacing
-        css_code (str, optional): Additional CSS styles
+        script (str): Additional JavaScript code
+        style (str): Additional CSS styles
     """
     
     DEFAULT_SIZES = {
@@ -52,12 +53,14 @@ class Heading(BaseComponent):
         line_height="1.2",
         text_transform=None,
         letter_spacing=None,
-        css_code=None
+        script=None,
+        style=None
     ):
+        """Initialize the heading component."""
         if not 1 <= level <= 6:
             raise ValueError("Heading level must be between 1 and 6")
             
-        super().__init__(id)
+        super().__init__(id=id, script=script, style=style)
         self.text = text
         self.level = level
         self.color = color
@@ -70,7 +73,6 @@ class Heading(BaseComponent):
         self.line_height = line_height
         self.text_transform = text_transform
         self.letter_spacing = letter_spacing
-        self.css_code = css_code
 
     def render(self):
         """Render the heading HTML."""
@@ -91,18 +93,20 @@ class Heading(BaseComponent):
             style.append(f"text-transform: {self.text_transform}")
         if self.letter_spacing:
             style.append(f"letter-spacing: {self.letter_spacing}")
-        if self.css_code:
-            style.append(self.css_code)
         
         template = Template(f"""
             <h{{{{ level }}}} id="{{{{ id }}}}" class="scorpiui-heading" style="{{{{ style }}}}">
                 {{{{ text }}}}
             </h{{{{ level }}}}>
+            {{{{ script }}}}
+            {{{{ custom_style }}}}
         """)
         
         return template.render(
             id=self.id,
             level=self.level,
             text=self.text,
-            style="; ".join(style)
+            style="; ".join(style),
+            script=self.get_script(),
+            custom_style=self.get_style()
         )

@@ -13,7 +13,7 @@ TODO:
 
 from flask import Flask, render_template, jsonify
 from flask_socketio import SocketIO, emit
-from scorpiui.core.events import handle_event
+from scorpiui.core.events import handle_component_event
 import os
 import logging
 import json
@@ -47,7 +47,7 @@ def handle_disconnect():
     logger.info('Client disconnected')
 
 @socketio.on('component_event')
-def handle_component_event(data):
+def handle_socket_event(data):
     """
     Handle component events via WebSocket.
     
@@ -63,15 +63,8 @@ def handle_component_event(data):
         event_id = data['event_id']
         logger.info(f'Handling event: {event_id}')
         
-        # Handle the event and get any response
-        response = handle_event(event_id, data)
-        
-        # Emit response back to the client if there is any
-        if response:
-            emit('event_response', {
-                'event_id': event_id,
-                'response': response
-            })
+        # Handle the event using the new handle_component_event function
+        handle_component_event(data)
             
     except Exception as e:
         logger.error(f'Error handling event: {str(e)}')

@@ -22,7 +22,8 @@ class Text(BaseComponent):
         font_style (str): Font style (e.g., 'normal', 'italic')
         text_decoration (str): Text decoration (e.g., 'underline')
         letter_spacing (str): Letter spacing
-        css_code (str, optional): Additional CSS styles
+        script (str): Additional JavaScript code
+        style (str): Additional CSS styles
     """
     
     VALID_TAGS = {
@@ -42,12 +43,14 @@ class Text(BaseComponent):
         font_style=None,
         text_decoration=None,
         letter_spacing=None,
-        css_code=None
+        script=None,
+        style=None
     ):
+        """Initialize the text component."""
         if tag not in self.VALID_TAGS:
             raise ValueError(f"Invalid tag: {tag}. Must be one of: {', '.join(sorted(self.VALID_TAGS))}")
             
-        super().__init__(id)
+        super().__init__(id=id, script=script, style=style)
         self.text = text
         self.tag = tag
         self.color = color
@@ -57,7 +60,6 @@ class Text(BaseComponent):
         self.font_style = font_style
         self.text_decoration = text_decoration
         self.letter_spacing = letter_spacing
-        self.css_code = css_code
 
     def render(self):
         """Render the text HTML."""
@@ -77,18 +79,20 @@ class Text(BaseComponent):
             style.append(f"text-decoration: {self.text_decoration}")
         if self.letter_spacing:
             style.append(f"letter-spacing: {self.letter_spacing}")
-        if self.css_code:
-            style.append(self.css_code)
         
         template = Template(f"""
             <{{{{ tag }}}} id="{{{{ id }}}}" class="scorpiui-text" {{{{ 'style="%s"' % style if style else '' }}}}>
                 {{{{ text }}}}
             </{{{{ tag }}}}>
+            {{{{ script }}}}
+            {{{{ custom_style }}}}
         """)
         
         return template.render(
             id=self.id,
             tag=self.tag,
             text=self.text,
-            style="; ".join(style)
+            style="; ".join(style) if style else "",
+            script=self.get_script(),
+            custom_style=self.get_style()
         )

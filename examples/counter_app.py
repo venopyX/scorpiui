@@ -102,7 +102,13 @@ def home():
         text=str(counter_state.state),
         color="#4CAF50",
         font_size="1.5rem",
-        font_weight="bold"
+        font_weight="bold",
+        script="""
+            // Log counter value changes to console
+            ScorpiUI.onStateChange('counter', function(newState) {
+                console.log('Counter value changed to:', newState);
+            });
+        """
     )
     # Bind counter state to the counter value text
     counter_value.bind_state('counter')

@@ -24,7 +24,8 @@ class Paragraph(BaseComponent):
         line_height (str): Line height
         letter_spacing (str): Letter spacing
         text_indent (str): First line indentation
-        css_code (str, optional): Additional CSS styles
+        script (str): Additional JavaScript code
+        style (str): Additional CSS styles
     """
     
     def __init__(
@@ -41,9 +42,11 @@ class Paragraph(BaseComponent):
         line_height="1.6",
         letter_spacing=None,
         text_indent=None,
-        css_code=None
+        script=None,
+        style=None
     ):
-        super().__init__(id)
+        """Initialize the paragraph component."""
+        super().__init__(id=id, script=script, style=style)
         self.text = text
         self.color = color
         self.font_size = font_size
@@ -55,7 +58,6 @@ class Paragraph(BaseComponent):
         self.line_height = line_height
         self.letter_spacing = letter_spacing
         self.text_indent = text_indent
-        self.css_code = css_code
 
     def render(self):
         """Render the paragraph HTML."""
@@ -76,17 +78,19 @@ class Paragraph(BaseComponent):
             style.append(f"letter-spacing: {self.letter_spacing}")
         if self.text_indent:
             style.append(f"text-indent: {self.text_indent}")
-        if self.css_code:
-            style.append(self.css_code)
         
         template = Template("""
             <p id="{{ id }}" class="scorpiui-paragraph" style="{{ style }}">
                 {{ text }}
             </p>
+            {{ script }}
+            {{ custom_style }}
         """)
         
         return template.render(
             id=self.id,
             text=self.text,
-            style="; ".join(style)
+            style="; ".join(style),
+            script=self.get_script(),
+            custom_style=self.get_style()
         )
