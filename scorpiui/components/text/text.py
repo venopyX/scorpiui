@@ -1,98 +1,71 @@
 """
 Text Component Module
 
-This module provides the base text component for inline text styling in ScorpiUI.
+This module provides a general text component for inline text in ScorpiUI.
 """
 
-from jinja2 import Template
-from scorpiui.core.base_component import BaseComponent
+from typing import Optional
+from scorpiui.components.text.base_text import BaseText
 
-class Text(BaseComponent):
+class Text(BaseText):
     """
-    A customizable inline text component.
+    A customizable text component for inline text.
     
     Attributes:
-        id (str): Unique identifier for the text component
+        id (str): Unique identifier for the text
         text (str): The text content
-        tag (str): HTML tag to use (span, strong, em, etc.)
         color (str): Text color
         font_size (str): Font size (e.g., '1rem')
-        font_weight (str): Font weight (e.g., 'normal', 'bold')
+        font_weight (str): Font weight (e.g., 'normal', '400')
         font_family (str): Font family
-        font_style (str): Font style (e.g., 'normal', 'italic')
-        text_decoration (str): Text decoration (e.g., 'underline')
+        margin (str): CSS margin value
+        padding (str): CSS padding value
+        text_align (str): Text alignment
+        line_height (str): Line height
         letter_spacing (str): Letter spacing
+        text_transform (str): Text transformation
+        text_decoration (str): Text decoration
         script (str): Additional JavaScript code
         style (str): Additional CSS styles
     """
     
-    VALID_TAGS = {
-        'span', 'strong', 'b', 'em', 'i', 'u', 'code', 'small',
-        'sub', 'sup', 's', 'mark', 'q', 'cite', 'kbd'
-    }
-    
     def __init__(
         self,
-        text,
-        id=None,
-        tag="span",
-        color=None,
-        font_size=None,
-        font_weight=None,
-        font_family=None,
-        font_style=None,
-        text_decoration=None,
-        letter_spacing=None,
-        script=None,
-        style=None
+        text: str,
+        id: Optional[str] = None,
+        color: str = "#000000",
+        font_size: str = "1rem",
+        font_weight: str = "normal",
+        font_family: Optional[str] = None,
+        margin: str = "0",
+        padding: Optional[str] = None,
+        text_align: str = "left",
+        line_height: str = "1.5",
+        letter_spacing: Optional[str] = None,
+        text_transform: Optional[str] = None,
+        text_decoration: Optional[str] = None,
+        script: Optional[str] = None,
+        style: Optional[str] = None
     ):
         """Initialize the text component."""
-        if tag not in self.VALID_TAGS:
-            raise ValueError(f"Invalid tag: {tag}. Must be one of: {', '.join(sorted(self.VALID_TAGS))}")
-            
-        super().__init__(id=id, script=script, style=style)
-        self.text = text
-        self.tag = tag
-        self.color = color
-        self.font_size = font_size
-        self.font_weight = font_weight
-        self.font_family = font_family
-        self.font_style = font_style
-        self.text_decoration = text_decoration
-        self.letter_spacing = letter_spacing
-
-    def render(self):
-        """Render the text HTML."""
-        style = []
-        
-        if self.color:
-            style.append(f"color: {self.color}")
-        if self.font_size:
-            style.append(f"font-size: {self.font_size}")
-        if self.font_weight:
-            style.append(f"font-weight: {self.font_weight}")
-        if self.font_family:
-            style.append(f"font-family: {self.font_family}")
-        if self.font_style:
-            style.append(f"font-style: {self.font_style}")
-        if self.text_decoration:
-            style.append(f"text-decoration: {self.text_decoration}")
-        if self.letter_spacing:
-            style.append(f"letter-spacing: {self.letter_spacing}")
-        
-        template = Template(f"""
-            <{{{{ tag }}}} id="{{{{ id }}}}" class="scorpiui-text" {{{{ 'style="%s"' % style if style else '' }}}}>
-                {{{{ text }}}}
-            </{{{{ tag }}}}>
-            {{{{ script }}}}
-            {{{{ custom_style }}}}
-        """)
-        
-        return template.render(
-            id=self.id,
-            tag=self.tag,
-            text=self.text,
-            style="; ".join(style) if style else "",
-            script=self.get_script(),
-            custom_style=self.get_style()
+        super().__init__(
+            text=text,
+            id=id,
+            color=color,
+            font_size=font_size,
+            font_weight=font_weight,
+            font_family=font_family,
+            margin=margin,
+            padding=padding,
+            text_align=text_align,
+            line_height=line_height,
+            letter_spacing=letter_spacing,
+            text_transform=text_transform,
+            text_decoration=text_decoration,
+            script=script,
+            style=style
         )
+
+    def render(self) -> str:
+        """Render the text HTML."""
+        return super().render(tag="span")

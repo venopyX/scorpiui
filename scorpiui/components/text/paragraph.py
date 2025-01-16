@@ -4,10 +4,10 @@ Paragraph Component Module
 This module provides the paragraph component for ScorpiUI.
 """
 
-from jinja2 import Template
-from scorpiui.core.base_component import BaseComponent
+from typing import Optional
+from scorpiui.components.text.base_text import BaseText
 
-class Paragraph(BaseComponent):
+class Paragraph(BaseText):
     """
     A customizable paragraph component.
     
@@ -30,67 +30,39 @@ class Paragraph(BaseComponent):
     
     def __init__(
         self,
-        text,
-        id=None,
-        color="#000000",
-        font_size="1rem",
-        font_weight="normal",
-        font_family=None,
-        margin="1em 0",
-        padding=None,
-        text_align="left",
-        line_height="1.6",
-        letter_spacing=None,
-        text_indent=None,
-        script=None,
-        style=None
+        text: str,
+        id: Optional[str] = None,
+        color: str = "#000000",
+        font_size: str = "1rem",
+        font_weight: str = "normal",
+        font_family: Optional[str] = None,
+        margin: str = "1em 0",
+        padding: Optional[str] = None,
+        text_align: str = "left",
+        line_height: str = "1.6",
+        letter_spacing: Optional[str] = None,
+        text_indent: Optional[str] = None,
+        script: Optional[str] = None,
+        style: Optional[str] = None
     ):
         """Initialize the paragraph component."""
-        super().__init__(id=id, script=script, style=style)
-        self.text = text
-        self.color = color
-        self.font_size = font_size
-        self.font_weight = font_weight
-        self.font_family = font_family
-        self.margin = margin
-        self.padding = padding
-        self.text_align = text_align
-        self.line_height = line_height
-        self.letter_spacing = letter_spacing
-        self.text_indent = text_indent
-
-    def render(self):
-        """Render the paragraph HTML."""
-        style = [
-            f"color: {self.color}",
-            f"font-size: {self.font_size}",
-            f"font-weight: {self.font_weight}",
-            f"margin: {self.margin}",
-            f"text-align: {self.text_align}",
-            f"line-height: {self.line_height}"
-        ]
-        
-        if self.font_family:
-            style.append(f"font-family: {self.font_family}")
-        if self.padding:
-            style.append(f"padding: {self.padding}")
-        if self.letter_spacing:
-            style.append(f"letter-spacing: {self.letter_spacing}")
-        if self.text_indent:
-            style.append(f"text-indent: {self.text_indent}")
-        
-        template = Template("""
-            <p id="{{ id }}" class="scorpiui-paragraph" style="{{ style }}">
-                {{ text }}
-            </p>
-            {{ script }}
-            {{ custom_style }}
-        """)
-        
-        return template.render(
-            id=self.id,
-            text=self.text,
-            style="; ".join(style),
-            script=self.get_script(),
-            custom_style=self.get_style()
+        super().__init__(
+            text=text,
+            id=id,
+            color=color,
+            font_size=font_size,
+            font_weight=font_weight,
+            font_family=font_family,
+            margin=margin,
+            padding=padding,
+            text_align=text_align,
+            line_height=line_height,
+            letter_spacing=letter_spacing,
+            text_indent=text_indent,
+            script=script,
+            style=style
         )
+
+    def render(self) -> str:
+        """Render the paragraph HTML."""
+        return super().render(tag="p")

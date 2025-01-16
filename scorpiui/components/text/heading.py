@@ -4,10 +4,10 @@ Heading Component Module
 This module provides heading components (h1-h6) for ScorpiUI.
 """
 
-from jinja2 import Template
-from scorpiui.core.base_component import BaseComponent
+from typing import Optional
+from scorpiui.components.text.base_text import BaseText
 
-class Heading(BaseComponent):
+class Heading(BaseText):
     """
     A customizable heading component.
     
@@ -40,73 +40,44 @@ class Heading(BaseComponent):
     
     def __init__(
         self,
-        text,
-        id=None,
-        level=1,
-        color="#000000",
-        font_size=None,
-        font_weight="bold",
-        font_family=None,
-        margin="0.5em 0",
-        padding=None,
-        text_align="left",
-        line_height="1.2",
-        text_transform=None,
-        letter_spacing=None,
-        script=None,
-        style=None
+        text: str,
+        id: Optional[str] = None,
+        level: int = 1,
+        color: str = "#000000",
+        font_size: Optional[str] = None,
+        font_weight: str = "bold",
+        font_family: Optional[str] = None,
+        margin: str = "0.5em 0",
+        padding: Optional[str] = None,
+        text_align: str = "left",
+        line_height: str = "1.2",
+        text_transform: Optional[str] = None,
+        letter_spacing: Optional[str] = None,
+        script: Optional[str] = None,
+        style: Optional[str] = None
     ):
         """Initialize the heading component."""
         if not 1 <= level <= 6:
             raise ValueError("Heading level must be between 1 and 6")
             
-        super().__init__(id=id, script=script, style=style)
-        self.text = text
         self.level = level
-        self.color = color
-        self.font_size = font_size or self.DEFAULT_SIZES[level]
-        self.font_weight = font_weight
-        self.font_family = font_family
-        self.margin = margin
-        self.padding = padding
-        self.text_align = text_align
-        self.line_height = line_height
-        self.text_transform = text_transform
-        self.letter_spacing = letter_spacing
-
-    def render(self):
-        """Render the heading HTML."""
-        style = [
-            f"color: {self.color}",
-            f"font-size: {self.font_size}",
-            f"font-weight: {self.font_weight}",
-            f"margin: {self.margin}",
-            f"text-align: {self.text_align}",
-            f"line-height: {self.line_height}"
-        ]
-        
-        if self.font_family:
-            style.append(f"font-family: {self.font_family}")
-        if self.padding:
-            style.append(f"padding: {self.padding}")
-        if self.text_transform:
-            style.append(f"text-transform: {self.text_transform}")
-        if self.letter_spacing:
-            style.append(f"letter-spacing: {self.letter_spacing}")
-        
-        template = Template(f"""
-            <h{{{{ level }}}} id="{{{{ id }}}}" class="scorpiui-heading" style="{{{{ style }}}}">
-                {{{{ text }}}}
-            </h{{{{ level }}}}>
-            {{{{ script }}}}
-            {{{{ custom_style }}}}
-        """)
-        
-        return template.render(
-            id=self.id,
-            level=self.level,
-            text=self.text,
-            style="; ".join(style),
-            script=self.get_script(),
-            custom_style=self.get_style()
+        super().__init__(
+            text=text,
+            id=id,
+            color=color,
+            font_size=font_size or self.DEFAULT_SIZES[level],
+            font_weight=font_weight,
+            font_family=font_family,
+            margin=margin,
+            padding=padding,
+            text_align=text_align,
+            line_height=line_height,
+            text_transform=text_transform,
+            letter_spacing=letter_spacing,
+            script=script,
+            style=style
         )
+
+    def render(self) -> str:
+        """Render the heading HTML."""
+        return super().render(tag=f"h{self.level}")
