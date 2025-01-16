@@ -66,6 +66,10 @@ class Text(BaseText):
             style=style
         )
 
+    def template(self) -> str:
+        """Get component template."""
+        return self.render()
+
     def render(self) -> str:
         """Render the text HTML."""
         return super().render(tag="span")

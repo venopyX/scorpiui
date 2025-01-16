@@ -161,6 +161,16 @@ class BaseText(Component):
             """
         return None
 
+    def template(self) -> str:
+        """Get component template."""
+        return self.render()
+
+    def _handle_state_change(self, state_name: str, new_value: Any):
+        """Handle state changes for text component."""
+        super()._handle_state_change(state_name, new_value)
+        # Update text content
+        self.text = str(new_value)
+
     def render(self, tag: str = "span", additional_styles: Optional[list] = None) -> str:
         """
         Render the text component HTML.

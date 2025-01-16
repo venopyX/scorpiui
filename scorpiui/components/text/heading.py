@@ -78,6 +78,10 @@ class Heading(BaseText):
             style=style
         )
 
+    def template(self) -> str:
+        """Get component template."""
+        return self.render()
+
     def render(self) -> str:
         """Render the heading HTML."""
         return super().render(tag=f"h{self.level}")
