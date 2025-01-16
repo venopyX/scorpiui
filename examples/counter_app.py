@@ -8,6 +8,7 @@ from scorpiui.core import run_app
 from scorpiui.core.renderer import app
 from scorpiui.components.forms import Button, TextInput
 from scorpiui.components.layout import Container
+from scorpiui.components.text import Heading, Text
 from scorpiui.core import ComponentState
 from flask import render_template
 
@@ -41,6 +42,7 @@ def on_increment_change(value):
 
 # Create UI components with custom colors and consistent sizing
 increment_button = Button(
+    id="increment-button",
     label="Increment",
     height="40px",
     width="120px",
@@ -56,6 +58,7 @@ increment_button = Button(
 )
 
 decrement_button = Button(
+    id="decrement-button",
     label="Decrement",
     height="40px",
     width="120px",
@@ -66,6 +69,7 @@ decrement_button = Button(
 )
 
 reset_button = Button(
+    id="reset-button",
     label="Reset",
     height="40px",
     width="120px",
@@ -76,6 +80,7 @@ reset_button = Button(
 )
 
 increment_input = TextInput(
+    id="increment-input",
     placeholder="Increment amount",
     value="1",
     width="120px",
@@ -89,14 +94,37 @@ increment_input = TextInput(
 def home():
     """Render the counter app."""
     # Create containers for layout
+    title = Heading(
+        id="counter-title",
+        text="ScorpiUI Counter Example",
+        level=1,
+        margin="20px 0",
+        text_align="center"
+    )
+    
+    counter_value = Text(
+        id="counter-value",
+        text=str(counter_state.state),
+        color="#4CAF50",
+        font_size="1.5rem",
+        font_weight="bold"
+    )
+    
+    counter_label = Text(
+        id="counter-label",
+        text="Counter: ",
+        font_size="1.5rem",
+        font_weight="bold"
+    )
+    
     title_container = Container(
-        content="<h1>ScorpiUI Counter Example</h1>",
+        content=title.render(),
         margin="20px",
         justify_content="center"
     )
     
     counter_container = Container(
-        content=f'<h2>Counter: <span id="counter-value" style="color: #4CAF50;">{counter_state.state}</span></h2>',
+        content=f'{counter_label.render()}{counter_value.render()}',
         margin="20px",
         justify_content="center"
     )

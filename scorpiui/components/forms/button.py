@@ -4,15 +4,16 @@ Button Component Module
 This module provides the Button component for ScorpiUI.
 """
 
-import uuid
 from jinja2 import Template
 from scorpiui.core.events import register_event
+from scorpiui.core.base_component import BaseComponent
 
-class Button:
+class Button(BaseComponent):
     """
     A customizable button component that uses WebSocket for event handling.
     
     Attributes:
+        id (str): Unique identifier for the button
         label (str): The text to display on the button
         height (str): Height of the button (e.g., '40px')
         width (str): Width of the button (e.g., '120px')
@@ -26,8 +27,22 @@ class Button:
         css_code (str, optional): Additional CSS styles to apply
     """
     
-    def __init__(self, label, height, width, background_color, text_color, border_radius, 
-                 onclick, padding="8px 16px", font_size="16px", js_code=None, css_code=None):
+    def __init__(
+        self,
+        label,
+        id=None,
+        height="40px",
+        width="120px",
+        background_color="#4CAF50",
+        text_color="#ffffff",
+        border_radius="4px",
+        padding="8px 16px",
+        font_size="16px",
+        onclick=None,
+        js_code=None,
+        css_code=None
+    ):
+        super().__init__(id)
         self.label = label
         self.height = height
         self.width = width
@@ -39,7 +54,6 @@ class Button:
         self.onclick = onclick
         self.js_code = js_code
         self.css_code = css_code
-        self.id = uuid.uuid4().hex
         register_event(self.id, self.handle_event)
 
     def handle_event(self, event_data):

@@ -4,15 +4,16 @@ TextInput Component Module
 This module provides the TextInput component for ScorpiUI.
 """
 
-import uuid
 from jinja2 import Template
 from scorpiui.core.events import register_event
+from scorpiui.core.base_component import BaseComponent
 
-class TextInput:
+class TextInput(BaseComponent):
     """
     A customizable text input component that uses WebSocket for event handling.
     
     Attributes:
+        id (str): Unique identifier for the input
         placeholder (str): Placeholder text for the input
         value (str): Initial value of the input
         height (str): Height of the input (e.g., '40px')
@@ -38,6 +39,7 @@ class TextInput:
     def __init__(
         self,
         placeholder,
+        id=None,
         value="",
         height="40px",
         width="120px",
@@ -58,6 +60,7 @@ class TextInput:
         js_code=None,
         css_code=None
     ):
+        super().__init__(id)
         self.placeholder = placeholder
         self.value = value
         self.height = height
@@ -78,7 +81,6 @@ class TextInput:
         self.on_change = on_change
         self.js_code = js_code
         self.css_code = css_code
-        self.id = uuid.uuid4().hex
         register_event(self.id, self.handle_event)
 
     def handle_event(self, event_data):
