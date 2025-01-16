@@ -35,6 +35,67 @@ app = Flask(__name__,
 # Initialize SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+# Global title state
+_title_state = {
+    'base_title': 'ScorpiUI',
+    'page_title': None,
+    'separator': ' | '
+}
+
+def set_base_title(base_title: str, separator: str = None):
+    """
+    Set the base title for the entire application.
+    This should be called once at app initialization.
+    
+    Args:
+        base_title (str): The base title for the app
+        separator (str, optional): The separator between base_title and page_title
+    """
+    _title_state['base_title'] = base_title
+    if separator is not None:
+        _title_state['separator'] = separator
+    
+    # Emit title update event to all clients
+    if socketio:
+        socketio.emit('title_update', {
+            'page_title': _title_state['page_title'],
+            'base_title': base_title,
+            'separator': _title_state['separator']
+        })
+
+def set_title(title: str):
+    """
+    Set the title for the current page.
+    This should be called within route handlers.
+    
+    Args:
+        title (str): The page-specific title
+    """
+    _title_state['page_title'] = title
+    
+    # Emit title update event to all clients
+    if socketio:
+        socketio.emit('title_update', {
+            'page_title': title,
+            'base_title': _title_state['base_title'],
+            'separator': _title_state['separator']
+        })
+
+def get_title() -> str:
+    """
+    Get the current full title.
+    
+    Returns:
+        str: The formatted title string
+    """
+    base = _title_state['base_title']
+    page = _title_state['page_title']
+    sep = _title_state['separator']
+    
+    if page:
+        return f"{page}{sep}{base}"
+    return base
+
 @socketio.on('connect')
 def handle_connect():
     """Handle WebSocket connection event."""

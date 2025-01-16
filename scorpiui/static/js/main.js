@@ -9,9 +9,17 @@ window.ScorpiUI = {
     // State management
     stateHandlers: {},
 
+    // Title management
+    titleState: {
+        baseTitle: 'ScorpiUI',
+        pageTitle: null,
+        separator: ' | '
+    },
+
     // Initialize ScorpiUI
     init: function() {
         this.initWebSocket();
+        this.initTitle();
         console.log('ScorpiUI initialized');
     },
 
@@ -39,6 +47,11 @@ window.ScorpiUI = {
             this.handleStateChange(component_id, state);
         });
 
+        this.socket.on('title_update', (data) => {
+            console.log('Title update:', data);
+            this.updateTitle(data.page_title, data.base_title, data.separator);
+        });
+
         this.socket.on('error', (data) => {
             console.error('ScorpiUI error:', data.message);
         });
@@ -46,6 +59,20 @@ window.ScorpiUI = {
         this.socket.on('disconnect', () => {
             console.log('Disconnected from ScorpiUI server');
         });
+    },
+
+    // Initialize title
+    initTitle: function() {
+        const title = document.title;
+        const separator = this.titleState.separator;
+        if (title.includes(separator)) {
+            const [pageTitle, baseTitle] = title.split(separator).map(t => t.trim());
+            this.titleState.pageTitle = pageTitle;
+            this.titleState.baseTitle = baseTitle;
+        } else {
+            this.titleState.baseTitle = title;
+        }
+        console.log('Title initialized:', this.titleState);
     },
 
     // Register event handler
@@ -82,6 +109,20 @@ window.ScorpiUI = {
     // Register state handler for a component
     onStateChange: function(componentId, handler) {
         this.stateHandlers[componentId] = handler;
+    },
+
+    // Update document title
+    updateTitle: function(pageTitle = null, baseTitle = null, separator = null) {
+        if (baseTitle) this.titleState.baseTitle = baseTitle;
+        if (separator) this.titleState.separator = separator;
+        this.titleState.pageTitle = pageTitle;
+
+        const title = pageTitle 
+            ? `${pageTitle}${this.titleState.separator}${this.titleState.baseTitle}`
+            : this.titleState.baseTitle;
+            
+        document.title = title;
+        console.log('Title updated:', title);
     },
 
     // Handle state change from server

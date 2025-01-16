@@ -5,7 +5,7 @@ This example demonstrates state management and responsive layout in ScorpiUI usi
 """
 
 from scorpiui.core import run_app
-from scorpiui.core.renderer import app
+from scorpiui.core.renderer import app, set_title, get_title, set_base_title
 from scorpiui.components.forms import Button, TextInput
 from scorpiui.components.layout import Container
 from scorpiui.components.text import Heading, Text
@@ -18,6 +18,9 @@ counter_state = ComponentState('counter', 0)
 
 # Create a state for the increment amount
 increment_state = ComponentState('increment', 1)
+
+# Set base title for the entire application
+set_base_title("ScorpiUI Demo", separator=" | ")
 
 def on_increment(event: EventData):
     """
@@ -155,6 +158,9 @@ register_event("reset-button_click", on_reset)
 @app.route('/')
 def home():
     """Render the counter app."""
+    # Set page title
+    set_title("Counter App")
+    
     # Create containers for layout
     title = Heading(
         id="counter-title",
@@ -248,7 +254,8 @@ def home():
         min_height="100vh"
     )
     
-    return render_template('base.html', content=main_container.render())
+    # Return the rendered template with title
+    return render_template('base.html', content=main_container.render(), title=get_title())
 
 if __name__ == '__main__':
     run_app(port=8000)
