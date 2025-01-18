@@ -1,6 +1,6 @@
-from scorpiui.app import app, run_app
-from scorpiui.components.button import Button
-from scorpiui.components.text_input import TextInput
+from scorpiui.core import run_app
+from scorpiui.core.renderer import app
+from scorpiui.components.forms import Button, TextInput
 from flask import render_template
 
 # Store input values
@@ -51,4 +51,4 @@ def home():
     return render_template('base.html', content=HTMLcontent, title="ScorpiUI Test")
 
 if __name__ == '__main__':
-    run_app()
+    run_app(port=8000)

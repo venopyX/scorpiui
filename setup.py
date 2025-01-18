@@ -4,11 +4,11 @@ setup(
     name='scorpiui',
     version='0.0.1',
     author='Gemechis Chala (ScorpiDev)',
-    author_email='gladsonchala@gmail.com',
+    author_email='venopyx@gmail.com',
     description='ScorpiUI: A Python UI library for building web apps with minimal HTML, CSS, and JS.',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/gladsonchala/scorpiui',
+    url='https://github.com/venopyx/scorpiui',
     packages=find_packages(),
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -31,7 +31,7 @@ setup(
         'Jinja2>=3.0',
     ],
     project_urls={
-        'Bug Tracker': 'https://github.com/gladsonchala/scorpiui/issues',
-        'Source': 'https://github.com/gladsonchala/scorpiui',
+        'Bug Tracker': 'https://github.com/venopyx/scorpiui/issues',
+        'Source': 'https://github.com/venopyx/scorpiui',
     },
 )
